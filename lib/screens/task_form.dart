@@ -40,7 +40,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         _counterColor = Colors.green;
       } else if (_charCount <= 80) {
         _statusLabel = 'Warning';
-        _counterColor = Colors.yellow;
+        _counterColor = Colors.orange;
       } else if (_charCount <= 120) {
         _statusLabel = 'Danger';
         _counterColor = Colors.red;
@@ -63,38 +63,74 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           key: _formKey,
           child: Column(
             children: [
+              // Title field
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
                 validator: (value) => value!.isEmpty ? 'Title is required' : null,
               ),
               SizedBox(height: 16.0),
+
+              // Description field with counter and dynamic border
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
-                validator: (value) => value!.isEmpty ? 'Description is required' : null,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: _charCount <= 120 ? Colors.grey : Colors.red),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: _charCount <= 120 ? Colors.blue : Colors.red),
+                  ),
+                  suffixText: _statusLabel,
+                  suffixStyle: TextStyle(color: _counterColor, fontWeight: FontWeight.bold),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) return 'Description is required';
+                  if (value.length > 120) return 'Description too long!';
+                  return null;
+                },
               ),
+
               SizedBox(height: 8.0),
-              Text(
-                'Characters: $_charCount / 120',
-                style: TextStyle(color: _counterColor, fontWeight: FontWeight.bold),
+              // Counter below the TextField
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Characters: $_charCount / 120',
+                    style: TextStyle(color: _counterColor, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              Text('Status: $_statusLabel', style: TextStyle(color: _counterColor)),
+
               SizedBox(height: 16.0),
+
+              // Priority dropdown
               DropdownButtonFormField<String>(
-                initialValue: _priority,
-                items: ['Low', 'Medium', 'High'].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                value: _priority,
+                items: ['Low', 'Medium', 'High']
+                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                    .toList(),
                 onChanged: (value) => setState(() => _priority = value!),
-                decoration: InputDecoration(labelText: 'Priority'),
+                decoration: InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
               ),
               SizedBox(height: 16.0),
+
+              // Status dropdown
               DropdownButtonFormField<String>(
-                initialValue: _status,
-                items: ['To Do', 'In Progress', 'Done'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                value: _status,
+                items: ['To Do', 'In Progress', 'Done']
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (value) => setState(() => _status = value!),
-                decoration: InputDecoration(labelText: 'Status'),
+                decoration: InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
               ),
+              SizedBox(height: 24.0),
+
+              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -115,7 +151,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                           },
                     child: Text(isEditing ? 'Update' : 'Save'),
                   ),
-                  ElevatedButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('Cancel'),
+                  ),
                 ],
               ),
             ],
