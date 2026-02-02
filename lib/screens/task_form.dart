@@ -5,7 +5,7 @@ class TaskFormScreen extends StatefulWidget {
   final Task? task;
   final Function(Task) onSave;
 
-  const TaskFormScreen({this.task, required this.onSave});
+  const TaskFormScreen({super.key, this.task, required this.onSave});
 
   @override
   State<TaskFormScreen> createState() => _TaskFormScreenState();
@@ -15,8 +15,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+
   String _priority = 'Low';
   String _status = 'To Do';
+
   int _charCount = 0;
   String _statusLabel = 'Safe';
   Color _counterColor = Colors.green;
@@ -28,6 +30,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _descriptionController = TextEditingController(text: widget.task?.description ?? '');
     _priority = widget.task?.priority ?? 'Low';
     _status = widget.task?.status ?? 'To Do';
+
     _updateCounter(_descriptionController.text);
     _descriptionController.addListener(() => _updateCounter(_descriptionController.text));
   }
@@ -56,36 +59,54 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     bool isEditing = widget.task != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEditing ? 'Edit Task' : 'Add Task')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      appBar: AppBar(
+        title: Text(isEditing ? 'Edit Task' : 'Add Task'),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Title field
+              // TITLE
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  prefixIcon: Icon(Icons.title),
+                ),
                 validator: (value) => value!.isEmpty ? 'Title is required' : null,
               ),
-              SizedBox(height: 16.0),
 
-              // Description field with counter and dynamic border
+              const SizedBox(height: 16),
+
+              // DESCRIPTION
               TextFormField(
                 controller: _descriptionController,
-                maxLines: 3,
+                maxLines: 4,
                 decoration: InputDecoration(
                   labelText: 'Description',
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: _charCount <= 120 ? Colors.grey : Colors.red),
+                  prefixIcon: const Icon(Icons.description),
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _counterColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _statusLabel,
+                        style: TextStyle(
+                          color: _counterColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: _charCount <= 120 ? Colors.blue : Colors.red),
-                  ),
-                  suffixText: _statusLabel,
-                  suffixStyle: TextStyle(color: _counterColor, fontWeight: FontWeight.bold),
                 ),
                 validator: (value) {
                   if (value!.isEmpty) return 'Description is required';
@@ -94,66 +115,152 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                 },
               ),
 
-              SizedBox(height: 8.0),
-              // Counter below the TextField
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    'Characters: $_charCount / 120',
-                    style: TextStyle(color: _counterColor, fontWeight: FontWeight.bold),
+              const SizedBox(height: 8),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Characters: $_charCount / 120',
+                  style: TextStyle(
+                    color: _counterColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
                   ),
-                ],
+                ),
               ),
 
-              SizedBox(height: 16.0),
+              const SizedBox(height: 20),
 
-              // Priority dropdown
+              // PRIORITY DROPDOWN (STYLED)
               DropdownButtonFormField<String>(
                 value: _priority,
-                items: ['Low', 'Medium', 'High']
-                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                    .toList(),
-                onChanged: (value) => setState(() => _priority = value!),
-                decoration: InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
-              ),
-              SizedBox(height: 16.0),
+                items: ['Low', 'Medium', 'High'].map((priority) {
+                  Color color;
+                  IconData icon;
 
-              // Status dropdown
+                  switch (priority) {
+                    case 'High':
+                      color = const Color(0xFFEF4444);
+                      icon = Icons.arrow_upward;
+                      break;
+                    case 'Medium':
+                      color = const Color(0xFFF59E0B);
+                      icon = Icons.remove;
+                      break;
+                    case 'Low':
+                      color = const Color(0xFF10B981);
+                      icon = Icons.arrow_downward;
+                      break;
+                    default:
+                      color = Colors.grey;
+                      icon = Icons.flag;
+                  }
+
+                  return DropdownMenuItem(
+                    value: priority,
+                    child: Row(
+                      children: [
+                        Icon(icon, color: color, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          priority,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _priority = value!),
+                decoration: const InputDecoration(
+                  labelText: 'Priority',
+                  prefixIcon: Icon(Icons.flag),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // STATUS DROPDOWN (STYLED)
               DropdownButtonFormField<String>(
                 value: _status,
-                items: ['To Do', 'In Progress', 'Done']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-                onChanged: (value) => setState(() => _status = value!),
-                decoration: InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-              ),
-              SizedBox(height: 24.0),
+                items: ['To Do', 'In Progress', 'Done'].map((status) {
+                  Color color;
+                  IconData icon;
 
-              // Buttons
+                  switch (status) {
+                    case 'To Do':
+                      color = const Color(0xFF3B82F6);
+                      icon = Icons.pending_actions;
+                      break;
+                    case 'In Progress':
+                      color = const Color(0xFFF59E0B);
+                      icon = Icons.sync;
+                      break;
+                    case 'Done':
+                      color = const Color(0xFF10B981);
+                      icon = Icons.check_circle;
+                      break;
+                    default:
+                      color = Colors.grey;
+                      icon = Icons.circle;
+                  }
+
+                  return DropdownMenuItem(
+                    value: status,
+                    child: Row(
+                      children: [
+                        Icon(icon, color: color, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _status = value!),
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  prefixIcon: Icon(Icons.track_changes),
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // BUTTONS
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-                    onPressed: _charCount > 120
-                        ? null
-                        : () {
-                            if (_formKey.currentState!.validate()) {
-                              Task newTask = Task(
-                                title: _titleController.text,
-                                description: _descriptionController.text,
-                                priority: _priority,
-                                status: _status,
-                              );
-                              widget.onSave(newTask);
-                              Navigator.pop(context);
-                            }
-                          },
-                    child: Text(isEditing ? 'Update' : 'Save'),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Cancel'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _charCount > 120
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                Task newTask = Task(
+                                  title: _titleController.text,
+                                  description: _descriptionController.text,
+                                  priority: _priority,
+                                  status: _status,
+                                );
+                                widget.onSave(newTask);
+                                Navigator.pop(context);
+                              }
+                            },
+                      child: Text(isEditing ? 'Update' : 'Save'),
+                    ),
                   ),
                 ],
               ),

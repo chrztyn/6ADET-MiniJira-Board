@@ -15,7 +15,7 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
   List<Task> tasks = [
     Task(
       title: 'Fix login bug',
-      description: 'Users can’t login on mobile devices.',
+      description: 'Users cannot login on mobile devices.',
       priority: 'High',
       status: 'To Do',
     ),
@@ -94,45 +94,97 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
     int remaining = total - done;
 
     return Scaffold(
-      appBar: AppBar(title: Text('MiniJira Board')),
+      appBar: AppBar(
+        title: const Text('MiniJira Board'),
+        elevation: 0,
+      ),
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StatBox(label: 'To Do', count: counts['To Do']!),
-              StatBox(label: 'In Progress', count: counts['In Progress']!),
-              StatBox(label: 'Done', count: counts['Done']!),
-            ],
-          ),
-          SizedBox(height: 16.0),
-          Card(
-            margin: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [Text('Total: $total'), Text('Done: $done'), Text('Remaining: $remaining')],
-              ),
+          // Stats Section
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StatBox(label: 'To Do', count: counts['To Do']!),
+                StatBox(label: 'In Progress', count: counts['In Progress']!),
+                StatBox(label: 'Done', count: counts['Done']!),
+              ],
             ),
           ),
-          SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: ['All', 'High Priority', 'Done'].map((filter) {
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.0),
-                child: ElevatedButton(
-                  onPressed: () => setState(() => currentFilter = filter),
-                  child: Text(filter),
-                  style: ElevatedButton.styleFrom(backgroundColor: currentFilter == filter ? Colors.blue : Colors.grey),
+          
+          // Summary Card
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-              );
-            }).toList(),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildSummaryItem('Total', '$total', Icons.list_alt),
+                Container(
+                  width: 1,
+                  height: 30,
+                  color: Colors.grey.shade300,
+                ),
+                _buildSummaryItem('Done', '$done', Icons.check_circle),
+                Container(
+                  width: 1,
+                  height: 30,
+                  color: Colors.grey.shade300,
+                ),
+                _buildSummaryItem('Remaining', '$remaining', Icons.pending),
+              ],
+            ),
           ),
-          SizedBox(height: 16.0),
+          
+          const SizedBox(height: 16),
+          
+          // Filter Buttons
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: ['All', 'High Priority', 'Done'].map((filter) {
+                bool isActive = currentFilter == filter;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ElevatedButton(
+                    onPressed: () => setState(() => currentFilter = filter),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isActive ? const Color(0xFF5B6CFF) : Colors.white,
+                      foregroundColor: isActive ? Colors.white : Colors.grey.shade700,
+                      elevation: isActive ? 2 : 0,
+                      side: BorderSide(
+                        color: isActive ? const Color(0xFF5B6CFF) : Colors.grey.shade300,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(filter),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Task List
           Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: filteredTasks.length,
               itemBuilder: (context, index) {
                 final task = filteredTasks[index];
@@ -142,8 +194,10 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
                   onEdit: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          TaskFormScreen(task: task, onSave: (updatedTask) => _updateTask(originalIndex, updatedTask)),
+                      builder: (context) => TaskFormScreen(
+                        task: task,
+                        onSave: (updatedTask) => _updateTask(originalIndex, updatedTask),
+                      ),
                     ),
                   ),
                   onDelete: () => _deleteTask(originalIndex),
@@ -154,10 +208,39 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TaskFormScreen(onSave: _addTask))),
-        child: Icon(Icons.add),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskFormScreen(onSave: _addTask),
+          ),
+        ),
+        child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildSummaryItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: const Color(0xFF5B6CFF), size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF5B6CFF),
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
