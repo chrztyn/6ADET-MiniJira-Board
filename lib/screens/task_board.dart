@@ -14,40 +14,40 @@ class TaskBoardScreen extends StatefulWidget {
 class _TaskBoardScreenState extends State<TaskBoardScreen> {
   List<Task> tasks = [
     Task(
-      title: 'Fix login bug',
-      description: 'Users cannot login on mobile devices.',
+      title: 'Build portfolio homepage',
+      description: 'Design and implement the main layout for the web portfolio.',
       priority: 'High',
       status: 'To Do',
     ),
     Task(
-      title: 'Update UI spacing',
-      description: 'Align header containers evenly across screens.',
+      title: 'Advanced Dynamic Web activity',
+      description: 'Implement dynamic forms using Angular.',
       priority: 'Medium',
       status: 'In Progress',
     ),
     Task(
-      title: 'Add user authentication',
-      description: 'Implement OAuth for secure login.',
-      priority: 'High',
-      status: 'Done',
-    ),
-    Task(
-      title: 'Optimize database queries',
-      description: 'Reduce load times for large datasets.',
-      priority: 'Low',
+      title: 'Cloud based web deployment',
+      description: 'Deploy a sample web app using cloud hosting services.',
+      priority: 'Medium',
       status: 'To Do',
     ),
     Task(
-      title: 'Write unit tests',
-      description: 'Cover core functionality with tests.',
-      priority: 'Medium',
+      title: 'Create resume',
+      description: 'Prepare a professional resume for the Web Portfolio subject.',
+      priority: 'High',
       status: 'In Progress',
     ),
     Task(
-      title: 'Deploy to production',
-      description: 'Push latest build to live server.',
+      title: 'Write cover letter',
+      description: 'Draft a tailored cover letter for the internship, highlighting technical skills.',
+      priority: 'Medium',
+      status: 'To Do',
+    ),
+    Task(
+      title: 'Study CLOUDCOM',
+      description: 'Review cloud computing concepts and lecture materials.',
       priority: 'High',
-      status: 'Done',
+      status: 'To Do',
     ),
   ];
 
@@ -94,10 +94,7 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
     int remaining = total - done;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MiniJira Board'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('MiniJira Board'), elevation: 0),
       body: Column(
         children: [
           // Stats Section
@@ -112,7 +109,7 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
               ],
             ),
           ),
-          
+
           // Summary Card
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -120,36 +117,22 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildSummaryItem('Total', '$total', Icons.list_alt),
-                Container(
-                  width: 1,
-                  height: 30,
-                  color: Colors.grey.shade300,
-                ),
+                Container(width: 1, height: 30, color: Colors.grey.shade300),
                 _buildSummaryItem('Done', '$done', Icons.check_circle),
-                Container(
-                  width: 1,
-                  height: 30,
-                  color: Colors.grey.shade300,
-                ),
+                Container(width: 1, height: 30, color: Colors.grey.shade300),
                 _buildSummaryItem('Remaining', '$remaining', Icons.pending),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Filter Buttons
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -165,12 +148,8 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
                       backgroundColor: isActive ? const Color(0xFF5B6CFF) : Colors.white,
                       foregroundColor: isActive ? Colors.white : Colors.grey.shade700,
                       elevation: isActive ? 2 : 0,
-                      side: BorderSide(
-                        color: isActive ? const Color(0xFF5B6CFF) : Colors.grey.shade300,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      side: BorderSide(color: isActive ? const Color(0xFF5B6CFF) : Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(filter),
                   ),
@@ -178,9 +157,9 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
               }).toList(),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Task List
           Expanded(
             child: ListView.builder(
@@ -194,10 +173,8 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
                   onEdit: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TaskFormScreen(
-                        task: task,
-                        onSave: (updatedTask) => _updateTask(originalIndex, updatedTask),
-                      ),
+                      builder: (context) =>
+                          TaskFormScreen(task: task, onSave: (updatedTask) => _updateTask(originalIndex, updatedTask)),
                     ),
                   ),
                   onDelete: () => _deleteTask(originalIndex),
@@ -208,12 +185,8 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TaskFormScreen(onSave: _addTask),
-          ),
-        ),
+        onPressed: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TaskFormScreen(onSave: _addTask))),
         child: const Icon(Icons.add),
       ),
     );
@@ -226,19 +199,11 @@ class _TaskBoardScreenState extends State<TaskBoardScreen> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF5B6CFF),
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF5B6CFF)),
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
         ),
       ],
     );
